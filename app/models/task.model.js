@@ -4,9 +4,9 @@ const sql = require('../../config/db');
 const Task = function (task) {
     this.title = task.title;
     this.description = task.description;
-    this.created_at = new Date();
-    this.done_at = null;
-    this.is_done = false
+    this.createdAt = new Date();
+    this.doneAt = null;
+    this.isDone = false
 }
 
 // result = cb
@@ -63,24 +63,28 @@ Task.update = (id, task, result) => {
         "UPDATE tasks SET title = ?, description = ? WHERE id = ?",
         [task.title, task.description, id],
         (err, res) => {
-            if (err) {
+            if (err || res.affectedRows === 0) {
                 console.log("update task error: ", err);
                 result(null, err);
                 return;
             }
-
-            if (res.affectedRows == 0) {
-                // not found Customer with the id
-                result({ kind: "not_found" }, null);
-                return;
-            }
-
             console.log("updated task: ", { id: id, ...task });
-            result(null, { id: id, ...task });
+            result(null, true);
         }
     );
 };
 
+Task.done = (id, result) => {
+    sql.query(
+        "UPDATE tasks SET isDone = true, doneAt = CURDATE() WHERE id = ?",
+        [id],
+        (err, res) => {
+            if (err) return res.status(500).json({err_msg: err});
+            console.log("done task: ", { id: id });
+            result(null, { id: id});
+        }
+    )
+}
 
 Task.remove = (id, result) => {
     sql.query("DELETE FROM tasks WHERE id = ?", id, (err, res) => {
@@ -90,7 +94,7 @@ Task.remove = (id, result) => {
             return;
         }
 
-        if (res.affectedRows == 0) {
+        if (res.affectedRows === 0) {
             // not found Customer with the id
             result({ kind: "not_found" }, null);
             return;
