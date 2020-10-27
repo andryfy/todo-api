@@ -25,7 +25,6 @@ exports.getTaskById = (req, res) => {
             }
         } else res.json(result);
     });
-
 };
 
 exports.createTask = (req, res) => {
@@ -36,13 +35,13 @@ exports.createTask = (req, res) => {
         });
     }
 
-    // Create a Customer
+    // Create a Task
     const newTask = new Task({
         title: req.body.title,
         description: req.body.description
     });
 
-    // Save Customer in the database
+    // Save Task in the database
     Task.create(newTask, (err, result) => {
         if (err)
             return res.status(500).json({
@@ -83,7 +82,6 @@ exports.doneTask = (req, res) => {
         return res.json(result);
     })
 }
-
 
 exports.deleteTask = (req, res) => {
     Task.remove(req.params.id, (err, data) => {
